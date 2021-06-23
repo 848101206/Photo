@@ -1,30 +1,58 @@
+/* eslint-disable no-unused-vars */
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Home from "../views/Home.vue";
+import Login from "../views/Login.vue";
+import Photo from "../views/Photo.vue";
+import store from "../store";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
-    path: "/",
-    name: "Home",
-    component: Home
+    path: "/login",
+    name: "Login",
+    component: Login,
   },
   {
-    path: "/about",
-    name: "About",
+    path: "/photo",
+    name: "Photo",
+    component: Photo,
+    meta: {
+      isAuth: true,
+    },
+  },
+  {
+    path: "/detail/:id",
+    name: "Details",
+    props: true,
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () =>
-      import(/* webpackChunkName: "about" */ "../views/About.vue")
-  }
+      import(/* webpackChunkName: "details" */ "../views/Details.vue"),
+  },
 ];
 
 const router = new VueRouter({
   mode: "history",
   base: process.env.BASE_URL,
-  routes
+  routes,
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.meta.isAuth) {
+    // token
+    const token = store.state.token;
+    if (token) {
+      next();
+    } else {
+      next({
+        name: "Login",
+      });
+    }
+  } else {
+    next();
+  }
 });
 
 export default router;
